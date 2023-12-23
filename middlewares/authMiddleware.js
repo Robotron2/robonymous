@@ -6,7 +6,11 @@ const requireSignIn = async (req, res, next) => {
 		req.user = decode
 		next()
 	} catch (error) {
-		console.log(error)
+		// console.log(error)
+		return res.status(403).json({
+			error: error.message,
+			success: false,
+		})
 	}
 }
 

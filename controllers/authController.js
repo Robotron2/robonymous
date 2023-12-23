@@ -63,7 +63,11 @@ const registerController = async (req, res) => {
 			res.status(201).json({
 				success: true,
 				message: "User registered successfully",
-				user: newUser,
+				user: {
+					username: newUser.username,
+					email: newUser.email,
+					id: newUser._id,
+				},
 			})
 		})
 	} catch (error) {

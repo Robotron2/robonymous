@@ -39,6 +39,32 @@ const postAnonymousController = async (req, res) => {
 	}
 }
 
+const getAllMessagesController = async (req, res) => {
+	const { user } = req
+	try {
+		const data = await User.findById(user._id, {
+			createdAt: 0,
+			updatedAt: 0,
+			password: 0,
+			_id: 0,
+		})
+
+		if (!data) {
+			throw Error("User data not found")
+		}
+		return res.status(201).json({
+			success: true,
+			messages: data.inbox,
+		})
+	} catch (error) {
+		res.status(500).json({
+			error: error.message,
+			success: false,
+		})
+	}
+}
+
 module.exports = {
 	postAnonymousController,
+	getAllMessagesController,
 }
