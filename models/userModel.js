@@ -3,8 +3,9 @@ const { Schema, model } = require("mongoose")
 const messageSchema = new Schema(
 	{
 		content: { type: String, required: true },
+		_id: { type: Number, required: true },
 	},
-	{ timestamps: true }
+	{ timestamps: false }
 )
 
 const userSchema = new Schema(

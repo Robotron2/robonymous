@@ -18,9 +18,11 @@ app.use(express.json())
 app.use(morgan("dev"))
 
 const authRoute = require("./routes/authRoute")
+const messageRoute = require("./routes/messageRoute")
 
 // API routes
 app.use("/api/auth", authRoute)
+app.use("/api/msgs", messageRoute)
 
 const port = process.env.PORT
 
