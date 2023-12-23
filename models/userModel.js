@@ -11,7 +11,7 @@ const messageSchema = new Schema(
 const userSchema = new Schema(
 	{
 		username: { type: String, required: true },
-		email: { type: String },
+		email: { type: String, unique: true, sparse: true },
 		password: { type: String, required: true },
 		inbox: [messageSchema],
 		createdAt: { type: Date, default: Date.now },

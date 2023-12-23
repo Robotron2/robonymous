@@ -124,6 +124,41 @@ const loginController = async (req, res) => {
 	}
 }
 
+const updateEmailController = async (req, res) => {
+	try {
+		const { _id } = req.user
+		const { email } = req.body
+		const formattedEmail = _.toLower(email)
+		const user = await User.findById(_id, {
+			createdAt: 0,
+			updatedAt: 0,
+			password: 0,
+		})
+
+		if (!user) {
+			return res.status(404).json({ error: "User not found" })
+		}
+
+		const match = await User.findOne({ email: formattedEmail })
+		if (match) {
+			return res.status(403).json({
+				success: false,
+				message: "Email exists.",
+			})
+		}
+
+		user.email = formattedEmail
+		await user.save()
+
+		res
+			.status(200)
+			.json({ success: true, message: "Email updated successfully", user })
+	} catch (error) {
+		console.error(error)
+		res.status(500).json({ error: "Internal Server Error" })
+	}
+}
+
 const forgotPasswordController = async (req, res) => {
 	//
 }
@@ -131,5 +166,6 @@ const forgotPasswordController = async (req, res) => {
 module.exports = {
 	registerController,
 	loginController,
+	updateEmailController,
 	forgotPasswordController,
 }
