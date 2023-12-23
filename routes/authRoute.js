@@ -1,8 +1,11 @@
-const express = require('express');
+const express = require("express")
 
-const  { forgotPasswordController, loginController, registerController } = require( "../controllers/authController.js")
-const  { requireSignIn } =requrie( "../middlewares/authMiddleware.js")
-
+const {
+	forgotPasswordController,
+	loginController,
+	registerController,
+} = require("../controllers/authController.js")
+const { requireSignIn } = require("../middlewares/authMiddleware.js")
 
 const router = express.Router()
 
@@ -15,4 +18,4 @@ router.get("/user-auth", requireSignIn, (req, res) => {
 	res.status(200).send({ ok: true })
 })
 
-export default router
+module.exports = router
