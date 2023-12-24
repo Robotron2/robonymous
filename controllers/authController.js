@@ -156,6 +156,11 @@ const updateEmailController = async (req, res) => {
 	try {
 		const { _id } = req.user
 		const { email } = req.body
+		if (!email) {
+			return res
+				.status(403)
+				.json({ error: "Email must be provided", success: false })
+		}
 		const formattedEmail = _.toLower(email)
 		const user = await User.findById(_id, {
 			createdAt: 0,
@@ -164,7 +169,7 @@ const updateEmailController = async (req, res) => {
 		})
 
 		if (!user) {
-			return res.status(404).json({ error: "User not found" })
+			return res.status(404).json({ error: "User not found", success: false })
 		}
 
 		const match = await User.findOne({ email: formattedEmail })
@@ -192,7 +197,9 @@ const forgotPasswordController = async (req, res) => {
 		const { email } = req.body
 
 		if (!email) {
-			return res.status(400).json({ error: "Email must be provided" })
+			return res
+				.status(400)
+				.json({ error: "Email must be provided", success: false })
 		}
 		const user = await User.findOne({ email })
 
