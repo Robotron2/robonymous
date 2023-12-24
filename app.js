@@ -24,7 +24,7 @@ const messageRoute = require("./routes/messageRoute")
 app.use("/api/auth", authRoute)
 app.use("/api/msgs", messageRoute)
 
-const port = process.env.PORT
+const port = process.env.PORT || 4000
 
 app.listen(port, () => {
 	console.log("App is running on port: " + port)

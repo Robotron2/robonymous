@@ -1,9 +1,37 @@
 const bcrypt = require("bcrypt")
 const JWT = require("jsonwebtoken")
 const _ = require("lodash")
+const nodemailer = require("nodemailer")
+const crypto = require("crypto")
+
 const { User } = require("../models/userModel")
 
 const saltRounds = 10
+
+const devMail = process.env.USER_MAIL
+const pass = process.env.USER_PASS
+// const host = process.env.SMTP
+// const port = process.env.MAIL_PORT
+
+const transporter = nodemailer.createTransport({
+	host: "smtp.gmail.com",
+	port: 465,
+	secure: true,
+	auth: {
+		user: devMail,
+		pass,
+	},
+})
+
+//Mailtrap SMTP method
+// const transporter = nodemailer.createTransport({
+// 	host,
+// 	port,
+// 	auth: {
+// 		user: devMail,
+// 		pass,
+// 	},
+// })
 
 const generateRandomString = (length) => {
 	const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
@@ -160,7 +188,92 @@ const updateEmailController = async (req, res) => {
 }
 
 const forgotPasswordController = async (req, res) => {
-	//
+	try {
+		const { email } = req.body
+
+		if (!email) {
+			return res.status(400).json({ error: "Email must be provided" })
+		}
+		const user = await User.findOne({ email })
+
+		if (!user) {
+			return res.status(404).json({ error: "User not found" })
+		}
+
+		const resetToken = crypto.randomBytes(20).toString("hex")
+
+		user.resetToken = resetToken
+		//user.resetTokenExpiry = Date.now() + 3600000 //Token expires in 1 hour
+		//user.resetTokenExpiry = Date.now() + 60000 // Token expires in 1 minute
+		user.resetTokenExpiry = Date.now() + 300000 // Token expires in 5 minute
+
+		await user.save()
+
+		const resetLink = `${process.env.BASE_URL}/api/auth/reset-password?token=${resetToken}`
+		const mailOptions = {
+			from: devMail,
+			to: email,
+			subject: "Password Reset",
+			html: `
+            <p>Click the following link to reset your password: ${resetLink} . \n This link expires in 1 minute</p>
+            
+            `,
+		}
+
+		const sendMail = await transporter.sendMail(mailOptions)
+		// console.log(sendMail)
+
+		return res
+			.status(200)
+			.json({ message: "Reset link sent to your email", success: true })
+	} catch (error) {
+		console.error(error)
+		res
+			.status(500)
+			.json({ error: "Internal Server Error", message: error.message })
+	}
+}
+
+const resetPasswordController = async (req, res) => {
+	try {
+		const { token } = req.query
+		const { newPassword } = req.body
+
+		if (!token) {
+			return res.status(400).json({
+				success: false,
+				message: "Token must be provided.",
+			})
+		}
+
+		if (!newPassword) {
+			return res.status(400).json({
+				success: false,
+				message: "New Password must be provided.",
+			})
+		}
+		const user = await User.findOne({
+			resetToken: token,
+			resetTokenExpiry: { $gt: Date.now() },
+		})
+
+		if (!user) {
+			return res.status(400).json({ error: "Invalid or expired token" })
+		}
+
+		bcrypt.hash(newPassword, saltRounds, async (err, hashedPassword) => {
+			user.password = hashedPassword
+			await user.save()
+
+			return res.status(201).json({
+				success: true,
+				message: "Password changed successfully",
+			})
+		})
+	} catch (error) {
+		console.error(error)
+		res.status(500).json({ error: "Internal Server Error" })
+	}
 }
 
 module.exports = {
@@ -168,4 +281,5 @@ module.exports = {
 	loginController,
 	updateEmailController,
 	forgotPasswordController,
+	resetPasswordController,
 }

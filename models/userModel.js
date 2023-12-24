@@ -14,6 +14,8 @@ const userSchema = new Schema(
 		email: { type: String, unique: true, sparse: true },
 		password: { type: String, required: true },
 		inbox: [messageSchema],
+		resetToken: { type: String },
+		resetTokenExpiry: Date,
 		createdAt: { type: Date, default: Date.now },
 	},
 	{ timestamps: true }
