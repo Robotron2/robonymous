@@ -222,7 +222,7 @@ const forgotPasswordController = async (req, res) => {
 			to: email,
 			subject: "Password Reset",
 			html: `
-            <p>Click the following link to reset your password: ${resetLink} . \n This link expires in 1 minute</p>
+            <p>Click the following link to reset your password: ${resetLink} . \n This link expires in 5 minute</p>
             
             `,
 		}
